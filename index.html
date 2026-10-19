@@ -1,0 +1,777 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Make a Wish!</title>
+
+  <link rel="stylesheet" href="1.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      font-family: 'Trebuchet MS', sans-serif;
+      background: linear-gradient(135deg, #fff0f5, #fce4ec, #fff7f0);
+      color: #a34e75;
+    }
+
+    .scene {
+      text-align: center;
+      padding: 20px;
+      width: 100%;
+      animation: appear 1.2s ease;
+    }
+
+    h1 {
+      font-size: clamp(28px, 6vw, 42px);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #bd7897;
+      font-size: 15px;
+      margin-bottom: 50px;
+    }
+
+    .cake-wrap {
+      position: relative;
+      width: 230px;
+      height: 205px;
+      margin: 0 auto;
+      animation: float 2.5s ease-in-out infinite;
+    }
+
+    .cake {
+      position: absolute;
+      width: 200px;
+      height: 105px;
+      left: 15px;
+      bottom: 30px;
+      background: #e99abb;
+      border-radius: 12px 12px 22px 22px;
+      box-shadow: inset 0 -12px #d77fa5;
+    }
+
+    .frosting {
+      position: absolute;
+      width: 100%;
+      height: 27px;
+      top: 0;
+      left: 0;
+      background: #fffafd;
+      border-radius: 12px 12px 50% 50%;
+      z-index: 2;
+    }
+
+    .drip {
+      position: absolute;
+      top: 15px;
+      left: 25px;
+      width: 18px;
+      height: 22px;
+      background: #fffafd;
+      border-radius: 0 0 12px 12px;
+      z-index: 3;
+    }
+
+    .drip.two {
+      left: 85px;
+      height: 15px;
+    }
+
+    .drip.three {
+      left: 150px;
+      height: 25px;
+    }
+
+    .sprinkle {
+      position: absolute;
+      width: 12px;
+      height: 4px;
+      border-radius: 4px;
+      background: #f7c65d;
+      top: 12px;
+      left: 48px;
+      transform: rotate(25deg);
+      z-index: 4;
+    }
+
+    .sprinkle.two {
+      left: 120px;
+      top: 10px;
+      background: #9bd6cb;
+      transform: rotate(-25deg);
+    }
+
+    .sprinkle.three {
+      left: 165px;
+      top: 18px;
+      background: #c6a5e8;
+    }
+
+    .candle {
+      position: absolute;
+      width: 16px;
+      height: 58px;
+      bottom: 133px;
+      left: 107px;
+      border-radius: 4px 4px 0 0;
+      background: repeating-linear-gradient(
+        45deg,
+        #fff 0 7px,
+        #f28eb3 7px 14px
+      );
+      z-index: 5;
+    }
+
+    .flame {
+      position: absolute;
+      width: 20px;
+      height: 29px;
+      left: -2px;
+      top: -29px;
+      background: #ffbd45;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      transform-origin: center;
+      box-shadow: 0 0 20px #ffca70;
+      animation: flicker 0.35s infinite alternate;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .flame::after {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 13px;
+      background: #fff2a6;
+      border-radius: 50% 50% 50% 0;
+      top: 7px;
+      left: 7px;
+    }
+
+    .flame.out {
+      opacity: 0;
+      transform: translateY(-18px) scale(0.2) rotate(-45deg);
+      animation: none;
+      pointer-events: none;
+    }
+
+    .smoke {
+      position: absolute;
+      left: 4px;
+      top: -33px;
+      font-size: 25px;
+      opacity: 0;
+      transform: translateY(0);
+    }
+
+    .smoke.show {
+      animation: smoke 1.3s ease-out forwards;
+    }
+
+    .plate {
+      position: absolute;
+      width: 230px;
+      height: 17px;
+      left: 0;
+      bottom: 18px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 5px 0 #edc2d3;
+    }
+
+    .buttons {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 30px;
+      padding: 13px 20px;
+      background: #d77fa5;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      background: #bd668b;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    #status {
+      min-height: 45px;
+      margin: 20px auto 0;
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 320px;
+    }
+
+    .wish {
+      display: none;
+      font-size: 24px;
+      margin-top: 18px;
+      animation: appear 1s ease;
+    }
+
+    .wish.show {
+      display: block;
+    }
+
+    /* FOUR ENVELOPES */
+
+    .letter-section {
+      display: none;
+      margin: 20px auto 0;
+      animation: appear 1s ease;
+    }
+
+    .letter-section.show {
+      display: block;
+    }
+
+    .envelope-heading {
+      font-family: Georgia, serif;
+      font-size: 19px;
+      margin-bottom: 6px;
+    }
+
+    .envelope-subtitle {
+      color: #bd7897;
+      font-size: 12px;
+      margin-bottom: 15px;
+    }
+
+    .envelope-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(100px, 130px));
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .envelope-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 12px 8px;
+      border: 1px solid #f2ccdc;
+      border-radius: 15px;
+      background: #fff8fb;
+      color: #a34e75;
+    }
+
+    .envelope-button:hover {
+      background: #fce4ec;
+      transform: translateY(-4px);
+    }
+
+    .envelope {
+      display: block;
+      font-size: 42px;
+      animation: envelopeFloat 1.8s ease-in-out infinite;
+    }
+
+    .open-label {
+      font-size: 12px;
+    }
+
+    @keyframes envelopeFloat {
+      50% {
+        transform: translateY(-5px) rotate(3deg);
+      }
+    }
+
+    /* LETTER POPUP */
+
+    .letter-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      padding: 20px;
+      background: #4c283bcc;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .letter-overlay.show {
+      display: flex;
+    }
+
+    .letter-card {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 35px 28px;
+      background: #fffaf5;
+      color: #81516a;
+      border-radius: 12px;
+      box-shadow: 0 15px 50px #33142644;
+      text-align: left;
+      animation: appear 0.4s ease;
+    }
+
+    .letter-card h2 {
+      color: #b65d83;
+      font-family: Georgia, serif;
+    }
+
+    .letter-decoration {
+      text-align: center;
+      color: #d77fa5;
+    }
+
+    .letter-message {
+      white-space: pre-line;
+      font-family: Georgia, serif;
+      font-size: 15px;
+      line-height: 1.9;
+    }
+
+    .close-letter {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 5px 12px;
+      background: transparent;
+      color: #a34e75;
+      font-size: 25px;
+    }
+
+    .close-letter:hover {
+      background: #fce4ec;
+    }
+
+    @keyframes flicker {
+      from {
+        scale: 1;
+        rotate: -4deg;
+      }
+      to {
+        scale: 0.88;
+        rotate: 4deg;
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-9px);
+      }
+    }
+
+    @keyframes smoke {
+      0% {
+        opacity: 0;
+        transform: translateY(0) scale(0.7);
+      }
+      25% {
+        opacity: 0.6;
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-35px) scale(1.5);
+      }
+    }
+
+    @keyframes appear {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-height: 650px) {
+      .subtitle {
+        margin-bottom: 20px;
+      }
+
+      .cake-wrap {
+        transform: scale(0.85);
+        margin-bottom: -20px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .envelope-grid {
+        grid-template-columns: repeat(2, minmax(90px, 115px));
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="scene">
+
+    <h1>Make a Wish!</h1>
+
+    <p class="subtitle">
+      A little cake, a little wish, a little magic.
+    </p>
+
+    <div class="cake-wrap">
+      <div class="candle">
+        <div class="flame" id="flame"></div>
+        <div class="smoke" id="smoke">〰</div>
+      </div>
+
+      <div class="cake">
+        <div class="frosting"></div>
+        <div class="drip"></div>
+        <div class="drip two"></div>
+        <div class="drip three"></div>
+        <div class="sprinkle"></div>
+        <div class="sprinkle two"></div>
+        <div class="sprinkle three"></div>
+      </div>
+
+      <div class="plate"></div>
+    </div>
+
+    <div class="buttons">
+      <button id="micButton" type="button">🎤 Enable Microphone</button>
+      <button id="blowButton" type="button">💨 Blow Out Candle</button>
+      <button id="relightButton" type="button" hidden>🕯️ Light Again</button>
+    </div>
+
+    <p id="status" aria-live="polite">
+      Enable your microphone, then gently blow toward it!
+    </p>
+
+    <div class="wish" id="wish">
+      ✨ Your wish is on its way! ✨
+    </div>
+
+    <!-- FOUR ENVELOPES -->
+
+    <div class="letter-section" id="letterSection">
+      <p class="envelope-heading">A little surprise for you ♡</p>
+      <p class="envelope-subtitle">Choose any envelope to open a letter!</p>
+
+      <div class="envelope-grid">
+
+        <button class="envelope-button" data-letter="0" type="button">
+          <span class="envelope">💌</span>
+          <span class="open-label">yunis</span>
+        </button>
+
+        <button class="envelope-button" data-letter="1" type="button">
+          <span class="envelope">💌</span>
+          <span class="open-label">yuan</span>
+        </button>
+
+        <button class="envelope-button" data-letter="2" type="button">
+          <span class="envelope">💌</span>
+          <span class="open-label">mika</span>
+        </button>
+
+        <button class="envelope-button" data-letter="3" type="button">
+          <span class="envelope">💌</span>
+          <span class="open-label">angie</span>
+        </button>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- LETTER POPUP -->
+
+  <div class="letter-overlay" id="letterOverlay">
+    <div class="letter-card">
+      <button class="close-letter" id="closeLetter" type="button" aria-label="Close letter">×</button>
+
+      <p class="letter-decoration">♡ ── ✿ ── ♡</p>
+      <h2 id="letterTitle">Dear You,</h2>
+      <p class="letter-message" id="letterMessage"></p>
+    </div>
+  </div>
+
+  <script>
+    // ELEMENTS
+
+    const micButton = document.getElementById("micButton");
+    const blowButton = document.getElementById("blowButton");
+    const relightButton = document.getElementById("relightButton");
+
+    const flame = document.getElementById("flame");
+    const smoke = document.getElementById("smoke");
+    const statusText = document.getElementById("status");
+    const wish = document.getElementById("wish");
+    const letterSection = document.getElementById("letterSection");
+
+    const letterOverlay = document.getElementById("letterOverlay");
+    const letterTitle = document.getElementById("letterTitle");
+    const letterMessage = document.getElementById("letterMessage");
+    const closeLetter = document.getElementById("closeLetter");
+
+    let audioContext;
+    let analyser;
+    let microphone;
+    let stream;
+    let animationId;
+    let isBlownOut = false;
+    let blowFrames = 0;
+    let lastBlowTime = 0;
+
+    // FOUR DIFFERENT LETTERS
+
+    const letters = [
+      {
+        title: "HAPPY BIRTHDAY DAWG!",
+        message: `time flies so fast, you're already 21! HAHAHA. i just wanna say nga i like how naning you've been this sem. i can really see nga you're trying to discipline yourself more and dili na mag-cram all the time. small progress is still progress, and i hope you give yourself credit for that!
+
+hopefully, imong birthday will be filled with happy moments, good vibes, and lots of reasons to smile. i also hope nga puhon, you'll achieve all the things you're working hard for and become successful in whatever path you choose.
+
+keep doing your best, but don't forget to enjoy life along the way pud. and most importantly, ayaw jud iwala imong coolness, dawg HAHAHAHA. stay cool, stay true to yourself, and enjoy your day to the fullest!
+
+happy birthday again!! wishing you more blessings, happiness, and good things ahead. ♡`
+      },
+      {
+        title: "Happy birthday Lexi, ",
+        message: `I wish you success sa imong life. I miss you so much. And yes, hilomon jud ko. Pero kusog ko mokatawa. AHAHAHAHAHA
+It's nice to see that you're embracing who you are. #blackpink yieeee. Chariz! I miss hanging out w you together w our friends... I miss your voice talking abt chika and imo bb Kuro yieeee.
+
+AHAHAHAHA labyu lexxxx eat well. 🫰🏻😘`
+      },
+      {
+        title: "Happy Birthday Lexieeeee!",
+        message: `I won’t make this message super long but I just wanna say how much I appreciate you as a person and that I’m happy to have a friend like you. I’ll support you in everything that you do and I wish you the best in everything. There’s alot more I would say pero yesss hehe. ROAD TO GRADUATION NATA DAWGGGG AND I HOPE YOU STAY GAY ALWAYS QUEEN.`
+      },
+      {
+        title: "To our pink y2k dawg. Happy Birthday, Lexii!!",
+        message: ` We might not say this enough, but we're really grateful to have you in our lives. Even if we don't always get to hang out as much as we'd like, you still manage to be there whenever we need you. And honestly, that's something we really appreciate about you.
+
+You have this way of caring for people that feels so genuine and effortless. You might not always show it in big ways, but we notice the little things, and they mean so much to us. 
+
+As you enter another year of your life, we hope you find more reasons to be happy and that all the kindness you give to others finds its way back to you, too. Hopefully we'd be able to spend more time together and make before us makagraduate. There's still so much we want to experience, and we hope we get to make the most of the time we have together.
+
+Thank you for being you and for being someone na we can always count on. Someone we know we can run to.:))
+
+We're really glad to have you as part of our little circle. We love you, and we're always rooting for you, dawgg!:D
+
+Happy birthday again! Luvyah, lexiiii! 🤍`
+      }
+    ];
+
+    // ENABLE MICROPHONE
+
+    async function enableMicrophone() {
+      if (!navigator.mediaDevices ||
+          !navigator.mediaDevices.getUserMedia) {
+        statusText.textContent =
+          "Try opening this page using VS Code Live Server for microphone access.";
+        return;
+      }
+
+      micButton.disabled = true;
+      statusText.textContent = "Waiting for microphone permission...";
+
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false
+          }
+        });
+
+        const AudioContextClass =
+          window.AudioContext || window.webkitAudioContext;
+
+        audioContext = new AudioContextClass();
+        await audioContext.resume();
+
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 1024;
+        analyser.smoothingTimeConstant = 0.15;
+
+        microphone = audioContext.createMediaStreamSource(stream);
+        microphone.connect(analyser);
+
+        micButton.textContent = "🎤 Microphone On";
+        statusText.textContent =
+          "Microphone ready! Gently blow toward your laptop mic.";
+
+        detectBlow();
+
+      } catch (error) {
+        micButton.disabled = false;
+        statusText.textContent =
+          "Microphone access blocked. Allow permission, or use the blow button.";
+      }
+    }
+
+    // DETECT BLOWING
+
+    function detectBlow() {
+      if (!analyser || isBlownOut) return;
+
+      const samples = new Uint8Array(analyser.fftSize);
+      analyser.getByteTimeDomainData(samples);
+
+      let sum = 0;
+
+      for (let i = 0; i < samples.length; i++) {
+        const value = (samples[i] - 128) / 128;
+        sum += value * value;
+      }
+
+      const rms = Math.sqrt(sum / samples.length);
+      const threshold = 0.075;
+
+      if (rms > threshold) {
+        blowFrames++;
+      } else {
+        blowFrames = Math.max(0, blowFrames - 1);
+      }
+
+      if (
+        blowFrames >= 5 &&
+        Date.now() - lastBlowTime > 1500
+      ) {
+        lastBlowTime = Date.now();
+        blowFrames = 0;
+        extinguishCandle();
+        return;
+      }
+
+      animationId = requestAnimationFrame(detectBlow);
+    }
+
+    // EXTINGUISH CANDLE
+
+    function extinguishCandle() {
+      if (isBlownOut) return;
+
+      isBlownOut = true;
+      flame.classList.add("out");
+
+      smoke.classList.remove("show");
+      void smoke.offsetWidth;
+      smoke.classList.add("show");
+
+      wish.classList.add("show");
+      letterSection.classList.add("show");
+
+      statusText.textContent = "You did it! Make a wish. ✨";
+
+      blowButton.disabled = true;
+      relightButton.hidden = false;
+
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    }
+
+    // RELIGHT CANDLE
+
+    function relightCandle() {
+      isBlownOut = false;
+      blowFrames = 0;
+
+      flame.classList.remove("out");
+      smoke.classList.remove("show");
+      wish.classList.remove("show");
+      letterSection.classList.remove("show");
+      letterOverlay.classList.remove("show");
+
+      blowButton.disabled = false;
+      relightButton.hidden = true;
+
+      statusText.textContent = stream
+        ? "The candle is lit again! Blow gently to try again."
+        : "The candle is lit! Enable the mic or use the blow button.";
+
+      if (analyser) {
+        detectBlow();
+      }
+    }
+
+    // CLICK ANY ENVELOPE TO OPEN ITS LETTER
+
+    document.querySelectorAll(".envelope-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const index = Number(button.dataset.letter);
+        const letter = letters[index];
+
+        if (!letter) return;
+
+        letterTitle.textContent = letter.title;
+        letterMessage.textContent = letter.message;
+        letterOverlay.classList.add("show");
+      });
+    });
+
+    // CLOSE LETTER
+
+    closeLetter.addEventListener("click", () => {
+      letterOverlay.classList.remove("show");
+    });
+
+    letterOverlay.addEventListener("click", (event) => {
+      if (event.target === letterOverlay) {
+        letterOverlay.classList.remove("show");
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        letterOverlay.classList.remove("show");
+      }
+    });
+
+    // BUTTON EVENTS
+
+    micButton.addEventListener("click", enableMicrophone);
+    blowButton.addEventListener("click", extinguishCandle);
+    relightButton.addEventListener("click", relightCandle);
+
+    // CLEAN UP MICROPHONE
+
+    window.addEventListener("pagehide", () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+
+      if (audioContext && audioContext.state !== "closed") {
+        audioContext.close();
+      }
+    });
+  </script>
+</body>
+</html>
+
